@@ -6,7 +6,9 @@
 # in which the individual parameters are defined.
 
 # Importing required libraries
+from email.mime.multipart import MIMEMultipart
 from email.message import EmailMessage
+from email.mime.text import MIMEText
 import configparser
 import datetime
 import markdown
@@ -151,7 +153,7 @@ def convert_md_html():
         sys.exit(-1)
 
 
-def send_email():
+def compose_email():
     # If no custom subject is specified, the default header from the logfile will be used
     logging.debug("\t{0}\tSetting up E-Mail...".format(logtime))
     subject = cfp.get('email-config', 'subject')
@@ -159,26 +161,6 @@ def send_email():
     if subject == 'default':
         subject = cfp.get('logfile-config', 'header') + ' ' + logtime
         logging.debug("\t{0}\tSubject is changed to: {1}".format(logtime, subject))
-
-    # Reading the content of the logfile
-    if html_format == 'enabled':
-        logging.debug("\t{0}\tCalling convert function to convert MD to HTML".format(logtime))
-        convert_md_html()
-
-        logging.debug("\t{0}\tReading HTML-message...".format(logtime))
-        with open(html_logfile, 'r') as lf:
-            content = lf.readlines()
-            message = "".join(content)
-            lf.close()
-            logging.debug("\t{0}\tMessage is set.".format(logtime))
-
-    else:
-        logging.debug("\t{0}\tReading MD-message...".format(logtime))
-        with open(logfile, 'r') as lf:
-            content = lf.readlines()
-            message = "".join(content)
-            lf.close()
-            logging.debug("\t{0}\tMessage is set.".format(logtime))
 
     # Setting up the E-Mail service
     logging.debug("\t{0}\tMore settings...".format(logtime, subject))
@@ -198,6 +180,57 @@ def send_email():
     port = cfp.get('email-config', 'port')
     logging.debug("\t{0}\tPort is: {1}".format(logtime, port))
 
+    # Reading the content of the logfile
+    if html_format == 'enabled':
+        logging.debug("\t{0}\tCalling convert function to convert MD to HTML".format(logtime))
+        convert_md_html()
+
+        logging.debug("\t{0}\tReading HTML-message...".format(logtime))
+        with open(html_logfile, 'r') as lf:
+            content = lf.readlines()
+            message_html = "".join(content)
+            lf.close()
+            logging.debug("\t{0}\tMessage is set.".format(logtime))
+
+        with open(logfile, 'r') as lf:
+            content = lf.readlines()
+            message_md = "".join(content)
+            lf.close()
+            logging.debug("\t{0}\tMessage is set.".format(logtime))
+
+        send_html_email(smtp_server, subject, sender, receiver, message_html, message_md)
+
+    else:
+        logging.debug("\t{0}\tReading MD-message...".format(logtime))
+        with open(logfile, 'r') as lf:
+            content = lf.readlines()
+            message = "".join(content)
+            lf.close()
+            logging.debug("\t{0}\tMessage is set.".format(logtime))
+
+        send_md_email(smtp_server, subject, sender, receiver, message)
+
+
+def send_html_email(smtp_server, subject, sender, receiver, message_html, message_md):
+    logging.debug("\t{0}\tPreparing to send E-Mail...".format(logtime))
+    part1 = MIMEText(message_md, 'plain')
+    part2 = MIMEText(message_html, 'html')
+
+    msg = MIMEMultipart('alternative')
+    msg.attach(part1)
+    msg.attach(part2)
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = receiver
+
+    logging.debug("\t{0}\tSetting up server-connection...".format(logtime))
+    s = smtplib.SMTP(smtp_server)
+    s.sendmail(sender, receiver, msg.as_string())
+    s.quit()
+    logging.debug("\t{0}\tMessage has been sent.".format(logtime))
+
+
+def send_md_email(smtp_server, subject, sender, receiver, message):
     logging.debug("\t{0}\tPreparing to send E-Mail...".format(logtime))
     msg = EmailMessage()
     msg['Subject'] = subject
@@ -214,4 +247,4 @@ def send_email():
 
 create_logfile()
 execute_commands()
-send_email()
+compose_email()
