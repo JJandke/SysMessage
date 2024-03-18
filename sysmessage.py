@@ -15,7 +15,8 @@ import os
 
 # Setup configparser
 cfp = configparser.RawConfigParser()
-cfp.read("/home/johannes/Host/Betrieb/HUB/Auslandseinsatz/DT-IT_SolutionsSlovakia/DailyMessage/configs.cfg")
+current_directory = os.getcwd()
+cfp.read(current_directory + '/configs.cfg')
 
 # Setup variables for logging
 loglevel = cfp.get('logfile-config', 'loglevel')
@@ -96,3 +97,4 @@ def execute_commands():
 
 create_logfile()
 execute_commands()
+
