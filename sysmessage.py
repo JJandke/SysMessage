@@ -144,7 +144,7 @@ def send_email():
     port = cfp.get('email-config', 'port')
 
     msg = EmailMessage()
-    msg['Subject'] = message
+    msg['Subject'] = subject
     msg['From'] = sender
     msg['To'] = receiver
     msg.set_content(message)
