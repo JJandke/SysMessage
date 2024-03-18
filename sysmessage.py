@@ -6,14 +6,13 @@
 # in which the individual parameters are defined.
 
 # Importing required libraries
-from email.mime.multipart import MIMEMultipart
+from email.message import EmailMessage
 import configparser
 import datetime
 import logging
 import smtplib
 import shutil
 import sys
-import ssl
 import os
 
 # Setup configparser
@@ -144,10 +143,15 @@ def send_email():
     sender = cfp.get('email-config', 'sender')
     port = cfp.get('email-config', 'port')
 
-    context = ssl.create_default_context()
-    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-        server.login(sender, password)
-        server.sendmail(sender, receiver, message)
+    msg = EmailMessage()
+    msg['Subject'] = message
+    msg['From'] = sender
+    msg['To'] = receiver
+    msg.set_content(message)
+
+    s = smtplib.SMTP(smtp_server)
+    s.send_message(msg)
+    s.quit()
 
 
 create_logfile()
