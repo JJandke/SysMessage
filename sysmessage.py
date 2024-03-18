@@ -3,7 +3,7 @@
 #
 # This script should execute several commands at start. The output is written to the file script.log, which will then
 # be emailed. No variables should be adjusted in this script. For configuration, the file script.yml is used,
-# in which the individual parameters are defined. 
+# in which the individual parameters are defined.
 
 # Importing required libraries
 import configparser
@@ -18,10 +18,16 @@ current_directory = os.getcwd()
 cfp.read(current_directory + '/configs.cfg')
 
 # Setup variables for logging
-loglevel = cfp.get('logfile-config', 'loglevel')
-timeformat = cfp.get('logfile-config', 'timeformat')
-logfile = cfp.get('logfile-config', 'logfile')
 now = datetime.datetime.now()
+try:
+    loglevel = cfp.get('logfile-config', 'loglevel')
+    timeformat = cfp.get('logfile-config', 'timeformat')
+    logfile = cfp.get('logfile-config', 'logfile')
+
+except Exception as e:
+    (print("\t{0}\tFATAL ERROR!: {1}".format(now, e)))
+    sys.exit(-1)
+
 logtime = now.strftime(timeformat)
 
 # Setup variables for commands to be executed
