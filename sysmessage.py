@@ -17,7 +17,7 @@ cfp = configparser.RawConfigParser()
 current_directory = os.getcwd()
 cfp.read(current_directory + '/configs.cfg')
 
-# Setup variables for logging
+# Setup variables for logging, catch exception, if configs.cfg is not available
 now = datetime.datetime.now()
 try:
     loglevel = cfp.get('logfile-config', 'loglevel')
@@ -41,14 +41,15 @@ def create_logfile():
 
     def create_header():
         # Opening the file and inserting the header
+        # The file will be automatically created, if it does not exist
         f = open(logfile, "a")
         f.write(header)
         f.close()
 
-    # Create log file if it does not exist.
+    # Create log file if it does not exist, either way, the header will be written to the logfile
     try:
         if os.path.isfile(logfile):
-            # Delete old logfile, which is not used anymore
+            # Delete old logfile, which is not needed anymore
             # TODO: Backup the old logfile before deleting it
             os.remove(logfile)
             create_header()
@@ -56,8 +57,8 @@ def create_logfile():
         else:
             create_header()
 
-    except Exception as e:
-        print("\t{0}\tFATAL ERROR!: {1}".format(logtime, e))
+    except Exception as e_nopath:
+        print("\t{0}\tFATAL ERROR!: {1}".format(logtime, e_nopath))
         sys.exit(-1)
 
     # Once the log file has been successfully created, the next step is to define the logging functionality.
@@ -69,13 +70,18 @@ def setup_logging():
     try:
         logging.basicConfig(filename=logfile, encoding='utf-8', level=loglevel)
 
-    except Exception as e:
-        print(e)
+    except Exception as e_noconf:
+        print(e_noconf)
         print("FATAL ERROR! - Could not set up logging, exiting!")
         sys.exit(-1)
 
 
 def execute_commands():
+    # For-Loop to execute every command
+    # For each command in range of number_of_commands, the command will be read, saved to command_value and printed 
+    # into the daily-message.md file.
+    # Then command_value will be executed, and it's output will also be printed into daily-message.md
+    # In addition, some formatting ensures that the file is compliant with Markdown.
     try:
         for i in range(1, numer_of_commands + 1):
             new_command = f'command{i}'
@@ -94,8 +100,8 @@ def execute_commands():
             f.write("```\n\n".format(command_value))
             f.close()
 
-    except Exception as e:
-        logging.error("\t{0}\t".format(logtime), e)
+    except Exception as e_badcommand:
+        logging.error("\t{0}\t".format(logtime), e_badcommand)
         logging.error("\t{0}\tCould not execute the command: {1}".format(logtime, command_value))
         sys.exit(-1)
 
