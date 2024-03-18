@@ -6,11 +6,14 @@
 # in which the individual parameters are defined.
 
 # Importing required libraries
+from email.mime.multipart import MIMEMultipart
 import configparser
 import datetime
 import logging
+import smtplib
 import shutil
 import sys
+import ssl
 import os
 
 # Setup configparser
@@ -122,5 +125,31 @@ def execute_commands():
         sys.exit(-1)
 
 
+def send_email():
+    # If no custom subject is specified, the default header from the logfile will be used
+    subject = cfp.get('email-config', 'subject')
+    if subject == 'default':
+        subject = cfp.get('logfile-config', 'header') + ' ' + logtime
+
+    # Reading the content of the logfile
+    with open(logfile, 'r') as lf:
+        content = lf.readlines()
+        message = "".join(content)
+        lf.close()
+
+    # Setting up the E-Mail service
+    receiver = cfp.get('email-config', 'receivers')
+    smtp_server = cfp.get('email-config', 'smtp_server')
+    password = cfp.get('email-config', 'password')
+    sender = cfp.get('email-config', 'sender')
+    port = cfp.get('email-config', 'port')
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+        server.login(sender, password)
+        server.sendmail(sender, receiver, message)
+
+
 create_logfile()
 execute_commands()
+send_email()
