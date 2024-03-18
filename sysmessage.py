@@ -3,8 +3,7 @@
 #
 # This script should execute several commands at start. The output is written to the file script.log, which will then
 # be emailed. No variables should be adjusted in this script. For configuration, the file script.yml is used,
-# in which the individual parameters are defined. In this script, only the path to the config file should be
-# adjusted, depending on where the script is located. All other variables are defined in configs.cfg.
+# in which the individual parameters are defined. 
 
 # Importing required libraries
 import configparser
@@ -97,4 +96,3 @@ def execute_commands():
 
 create_logfile()
 execute_commands()
-
