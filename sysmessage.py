@@ -9,6 +9,7 @@
 import configparser
 import datetime
 import logging
+import shutil
 import sys
 import os
 
@@ -29,6 +30,7 @@ except Exception as e:
     sys.exit(-1)
 
 logtime = now.strftime(timeformat)
+backup_directory = current_directory + '/old-logs'
 
 # Setup variables for commands to be executed
 numer_of_commands = int(cfp.get('commands-config', 'number_of_commands'))
@@ -38,6 +40,16 @@ def create_logfile():
     # Read header from Logfile and format it for better readability
     header = cfp.get('logfile-config', 'header')
     header = "# " + header + " *" + logtime + "*\n\n"
+
+    def backup_logfile():
+        # If versioning is enabled, then the old logfile will be moved to the 'old-logs' folder before deleting it
+        # Using shutil.copy2 as it supports to also copy metadata and file-permissions
+        # Note, that only one copy per day will be saved
+        if not os.path.isdir(backup_directory):
+            os.mkdir(backup_directory)
+
+        old_log = backup_directory + '/' + now.strftime('%Y-%m-%d_') + 'daily-message.md'
+        shutil.copy2(logfile, old_log)
 
     def create_header():
         # Opening the file and inserting the header
@@ -50,7 +62,11 @@ def create_logfile():
     try:
         if os.path.isfile(logfile):
             # Delete old logfile, which is not needed anymore
-            # TODO: Backup the old logfile before deleting it
+            # Backup the old message, of versioning is set to 'true'
+            versioning = cfp.get('logfile-config', 'versioning')
+            if versioning == 'enabled':
+                backup_logfile()
+
             os.remove(logfile)
             create_header()
 
@@ -78,7 +94,7 @@ def setup_logging():
 
 def execute_commands():
     # For-Loop to execute every command
-    # For each command in range of number_of_commands, the command will be read, saved to command_value and printed 
+    # For each command in range of number_of_commands, the command will be read, saved to command_value and printed
     # into the daily-message.md file.
     # Then command_value will be executed, and it's output will also be printed into daily-message.md
     # In addition, some formatting ensures that the file is compliant with Markdown.
