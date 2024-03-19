@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# This script should execute several commands at start. The output is written to the file script.log, which will then
-# be emailed. No variables should be adjusted in this script. For configuration, the file script.yml is used,
+# This script should execute several commands at start. The output is written to the file daily-message.md, which will
+# then be emailed. No variables should be adjusted in this script. For configuration, the file configs.cfg is used,
 # in which the individual parameters are defined.
 
 # Importing required libraries
@@ -15,29 +15,25 @@ import shutil
 import sys
 import os
 
-# Setup configparser
-cfp = configparser.RawConfigParser()
+# Setup configparser, variables for commands to be executed and time-settings
+now = datetime.datetime.now()
 current_directory = os.getcwd()
+cfp = configparser.RawConfigParser()
 cfp.read(current_directory + '/configs.cfg')
+backup_directory = current_directory + '/old-logs'
+numer_of_commands = int(cfp.get('commands-config', 'number_of_commands'))
 
 # Setup variables for logging, catch exception, if configs.cfg is not available
-now = datetime.datetime.now()
 try:
     loglevel = cfp.get('logfile-config', 'loglevel')
     timeformat = cfp.get('logfile-config', 'timeformat')
     logfile = cfp.get('logfile-config', 'logfile')
 
-except Exception as e:
-    (print("\t{0}\tFATAL ERROR!: {1}".format(now, e)))
-    sys.exit(-1)
+except Exception as e_nolog:
+    (print("\t{0}\tFATAL ERROR!: {1}".format(now, e_nolog)))
+    sys.exit(1)
 
 logtime = now.strftime(timeformat)
-backup_directory = current_directory + '/old-logs'
-html_format = cfp.get('email-config', 'html')
-html_logfile = current_directory + '/' + 'daily-message.html'
-
-# Setup variables for commands to be executed
-numer_of_commands = int(cfp.get('commands-config', 'number_of_commands'))
 
 
 def create_logfile():
@@ -66,7 +62,7 @@ def create_logfile():
     try:
         if os.path.isfile(logfile):
             # Delete old logfile, which is not needed anymore
-            # Backup the old message, of versioning is set to 'true'
+            # Backup the old message, if versioning is set to 'true'
             versioning = cfp.get('logfile-config', 'versioning')
             if versioning == 'enabled':
                 backup_logfile()
@@ -79,7 +75,7 @@ def create_logfile():
 
     except Exception as e_nopath:
         print("\t{0}\tFATAL ERROR!: {1}".format(logtime, e_nopath))
-        sys.exit(-1)
+        sys.exit(1)
 
     # Once the log file has been successfully created, the next step is to define the logging functionality.
     setup_logging()
@@ -93,7 +89,7 @@ def setup_logging():
     except Exception as e_noconf:
         print(e_noconf)
         print("FATAL ERROR! - Could not set up logging, exiting!")
-        sys.exit(-1)
+        sys.exit(1)
 
 
 def execute_commands():
@@ -123,7 +119,7 @@ def execute_commands():
     except Exception as e_badcommand:
         logging.error("\t{0}\t".format(logtime), e_badcommand)
         logging.error("\t{0}\tCould not execute the command: {1}".format(logtime, command_value))
-        sys.exit(-1)
+        sys.exit(1)
 
 
 def compose_email():
@@ -135,7 +131,7 @@ def compose_email():
         subject = cfp.get('logfile-config', 'header') + ' ' + logtime
         logging.debug("\t{0}\tSubject is changed to: {1}".format(logtime, subject))
 
-    # Setting up the E-Mail service
+    # Setting up the E-Mail service: Receiver, Sender, SMTP-Server and Password...
     logging.debug("\t{0}\tMore settings...".format(logtime, subject))
 
     receiver = cfp.get('email-config', 'receivers')
@@ -154,15 +150,26 @@ def compose_email():
     logging.debug("\t{0}\tPort is: {1}".format(logtime, port))
 
     logging.debug("\t{0}\tReading MD-message...".format(logtime))
+    
+    # The logfile will be opened as lf, and it's content will be read into 'message' which is then used to print the
+    # file-content into the E-Mail
     with open(logfile, 'r') as lf:
         content = lf.readlines()
         message = "".join(content)
         lf.close()
         logging.debug("\t{0}\tMessage is set.".format(logtime))
-        send_md_email(smtp_server, subject, sender, receiver, message)
+        
+        # Calling the function with expected variables, to send the E-Mail
+        try:
+            send_md_email(smtp_server, subject, sender, receiver, message)
+        except Exception as e_nosend:
+            logging.error("\t{0}\t".format(logtime), e_nosend)
+            logging.error("\t{0}\tCould not send Email".format(logtime))
+            sys.exit(1)
 
 
 def send_md_email(smtp_server, subject, sender, receiver, message):
+    # Importing the EmailMessage-library and setting up the sender, receiver, subject and the message
     logging.debug("\t{0}\tPreparing to send E-Mail...".format(logtime))
     msg = EmailMessage()
     msg['Subject'] = subject
@@ -170,11 +177,14 @@ def send_md_email(smtp_server, subject, sender, receiver, message):
     msg['To'] = receiver
     msg.set_content(message)
 
+    # Opening a connection to the defined SMTP-Server, sending the message and closing this connection
     logging.debug("\t{0}\tSetting up server-connection...".format(logtime))
     s = smtplib.SMTP(smtp_server)
     s.send_message(msg)
     s.quit()
     logging.debug("\t{0}\tMessage has been sent.".format(logtime))
+    # Exiting with status 0 to indicate everything went well
+    sys.exit(0)
 
 
 create_logfile()
