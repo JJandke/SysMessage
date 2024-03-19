@@ -8,7 +8,7 @@ This project consists of three files.
 2. **configs.cfg** - A configuration file in which all options can be defined. 
 3. **sysmessage_light.py** A lightweight alternative without logging, for better readability
 
-**daily.message.example.md** is just an example of how a logfile would look like,
+**daily.message.example.md** is just an example of how a logfile would look like.
 
 ---
 
@@ -16,12 +16,12 @@ This project consists of three files.
 - It is important to note that the variable `number_of_commands` must correspond exactly to the number of commands to be executed, otherwise some commands will not be executed. 
 
 ---
+
 - The script reads the Linux commands to be executed under `[commands-config]`, executes them sequentially and saves their output in the **daily-message.md** file.
 - The file will then be read by the E-Mail handler, which is configured under `[email-config]` and sent via configured SMTP-Server.
 - The option `versioning` enables the skript to save old logfiles to the folder */old-logs*, which will be auto-generated.
+- 
 ---
-
-
 
 - The loglevel option can be used to control the level at which the logging of the script should be done.
   - Logging information is also added to the **daily-message.md** file. 
