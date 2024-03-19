@@ -24,6 +24,6 @@ This project consists of three files.
 
 - The loglevel option can be used to control the level at which the logging of the script should be done.
   - Logging information is also added to the **daily-message.md** file. 
-  - For available log-levels, refer to the [official docu](https://docs.python.org/3/library/logging.html#logging-levels).
+  - For available log-levels, refer to the [official doku](https://docs.python.org/3/library/logging.html#logging-levels).
 - The variable `timeformat` defines the formatting of the timestamps for logging and in the header of **daily-message.md**. 
   - Available formatting can be seen [here](https://strftime.org/).
