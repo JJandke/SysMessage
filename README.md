@@ -7,6 +7,7 @@ This project consists of three files.
 1. **sysmessage.py** - This is the source code
 2. **configs.cfg** - A configuration file in which all options can be defined. 
 3. **sysmessage_light.py** A lightweight alternative without logging, for better readability
+
 **daily.message.example.md** is just an example of how a logfile would look like,
 
 ---
