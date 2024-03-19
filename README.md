@@ -20,7 +20,7 @@ This project consists of three files.
 - The script reads the Linux commands to be executed under `[commands-config]`, executes them sequentially and saves their output in the **daily-message.md** file.
 - The file will then be read by the E-Mail handler, which is configured under `[email-config]` and sent via configured SMTP-Server.
 - The option `versioning` enables the skript to save old logfiles to the folder */old-logs*, which will be auto-generated.
-- 
+
 ---
 
 - The loglevel option can be used to control the level at which the logging of the script should be done.
