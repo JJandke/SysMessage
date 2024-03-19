@@ -33,6 +33,8 @@ except Exception as e:
 
 logtime = now.strftime(timeformat)
 backup_directory = current_directory + '/old-logs'
+html_format = cfp.get('email-config', 'html')
+html_logfile = current_directory + '/' + 'daily-message.html'
 
 # Setup variables for commands to be executed
 numer_of_commands = int(cfp.get('commands-config', 'number_of_commands'))
@@ -124,7 +126,7 @@ def execute_commands():
         sys.exit(-1)
 
 
-def send_email():
+def compose_email():
     # If no custom subject is specified, the default header from the logfile will be used
     logging.debug("\t{0}\tSetting up E-Mail...".format(logtime))
     subject = cfp.get('email-config', 'subject')
@@ -132,34 +134,35 @@ def send_email():
     if subject == 'default':
         subject = cfp.get('logfile-config', 'header') + ' ' + logtime
         logging.debug("\t{0}\tSubject is changed to: {1}".format(logtime, subject))
-        
 
-    # Reading the content of the logfile
-    logging.debug("\t{0}\tReading message...".format(logtime))
+    # Setting up the E-Mail service
+    logging.debug("\t{0}\tMore settings...".format(logtime, subject))
+
+    receiver = cfp.get('email-config', 'receivers')
+    logging.debug("\t{0}\tReceiver is: {1}".format(logtime, receiver))
+
+    smtp_server = cfp.get('email-config', 'smtp_server')
+    logging.debug("\t{0}\tSMTP-Server is: {1}".format(logtime, smtp_server))
+
+    password = cfp.get('email-config', 'password')
+    logging.debug("\t{0}\tPassword is: {1}".format(logtime, password))
+
+    sender = cfp.get('email-config', 'sender')
+    logging.debug("\t{0}\tSender is: {1}".format(logtime, sender))
+
+    port = cfp.get('email-config', 'port')
+    logging.debug("\t{0}\tPort is: {1}".format(logtime, port))
+
+    logging.debug("\t{0}\tReading MD-message...".format(logtime))
     with open(logfile, 'r') as lf:
         content = lf.readlines()
         message = "".join(content)
         lf.close()
-        logging.debug("\t{0}\tMessage is: {1}".format(logtime, message))
+        logging.debug("\t{0}\tMessage is set.".format(logtime))
+        send_md_email(smtp_server, subject, sender, receiver, message)
 
-    # Setting up the E-Mail service
-    logging.debug("\t{0}\tMore settings...".format(logtime, subject))
-    
-    receiver = cfp.get('email-config', 'receivers')
-    logging.debug("\t{0}\tReceiver is: {1}".format(logtime, receiver))
-    
-    smtp_server = cfp.get('email-config', 'smtp_server')
-    logging.debug("\t{0}\tSMTP-Server is: {1}".format(logtime, smtp_server))
-    
-    password = cfp.get('email-config', 'password')
-    logging.debug("\t{0}\tPassword is: {1}".format(logtime, password))
-    
-    sender = cfp.get('email-config', 'sender')
-    logging.debug("\t{0}\tSender is: {1}".format(logtime, sender))
-    
-    port = cfp.get('email-config', 'port')
-    logging.debug("\t{0}\tPort is: {1}".format(logtime, port))
 
+def send_md_email(smtp_server, subject, sender, receiver, message):
     logging.debug("\t{0}\tPreparing to send E-Mail...".format(logtime))
     msg = EmailMessage()
     msg['Subject'] = subject
@@ -176,4 +179,4 @@ def send_email():
 
 create_logfile()
 execute_commands()
-send_email()
+compose_email()
