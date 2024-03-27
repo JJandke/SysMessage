@@ -137,7 +137,7 @@ def convert_md_html():
             logging.debug("\t{0}\tFile has been read".format(logtime))
 
         logging.debug("\t{0}\tGoint to convert to HTML".format(logtime))
-        lfhtml = markdown.markdown(lfmd)
+        lfhtml = markdown.markdown(lfmd, extensions=['fenced_code'])
         logging.debug("\t{0}\tConverted to HTML".format(logtime))
 
         logging.debug("\t{0}\tGoint to write to new File".format(logtime))
