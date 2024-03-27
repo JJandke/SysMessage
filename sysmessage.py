@@ -137,7 +137,25 @@ def convert_md_html():
             logging.debug("\t{0}\tFile has been read".format(logtime))
 
         logging.debug("\t{0}\tGoint to convert to HTML".format(logtime))
-        lfhtml = markdown.markdown(lfmd, extensions=['fenced_code'])
+        converted = markdown.markdown(lfmd, extensions=['fenced_code'])
+
+        # Creating html-header for formating (like display font etc.)
+        lfhtml = f'''
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <style>
+        body {{
+            font-family: TeleNeo Office, sans-serif;
+        }}
+        </style>
+        </head>
+        <body>
+        {converted}
+        </body>
+        </html>
+        '''
+
         logging.debug("\t{0}\tConverted to HTML".format(logtime))
 
         logging.debug("\t{0}\tGoint to write to new File".format(logtime))
