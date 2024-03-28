@@ -9,7 +9,11 @@
 from email.mime.multipart import MIMEMultipart
 from email.message import EmailMessage
 from email.mime.text import MIMEText
+from markdown_code_blocks import CodeRenderer
+from markdown_code_blocks import highlight
+from markdown_code_blocks import main
 import markdown.extensions.fenced_code
+import markdown_code_blocks
 import configparser
 import datetime
 import markdown
@@ -140,23 +144,24 @@ def convert_md_html():
         logging.debug("\t{0}\tGoint to convert to HTML".format(logtime))
         converted = markdown.markdown(lfmd, extensions=['fenced_code', 'codehilite'])
 
-        # Creating html-header for formating (like display font etc.)
+        # Creating html-header for formatting (like display font etc.)
         lfhtml = f'''
         <!DOCTYPE html>
         <html>
         <head>
-        <style>
-        body {{
-            font-family: TeleNeo Office, sans-serif;
-        }}
-        </style>
+            <style>
+                body {{font-family: TeleNeo Office, sans-serif; color:#000000;}}
+                body {{ background-color: #ffffff;}}
+            </style>
         </head>
         <body>
-        {converted}
+            {converted}
         </body>
         </html>
         '''
 
+        # End of html-header,
+        # continuing with writing the converted logs to the new html file
         logging.debug("\t{0}\tConverted to HTML".format(logtime))
 
         logging.debug("\t{0}\tGoint to write to new File".format(logtime))
