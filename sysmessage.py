@@ -146,6 +146,7 @@ def convert_md_html():
                 <style>
                     body {{font-family: TeleNeo Office, sans-serif; color: #000000;}}
                     body {{background-color: #ffffff;}}
+                    code {{font-family: Courier New, monospace; font-weight: normal; font-size: medium; color: #ffffff; background-color: #373f4d; border-radius: 5px;}}
                 </style>
             </head>
             <body>
