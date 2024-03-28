@@ -9,6 +9,7 @@
 from email.mime.multipart import MIMEMultipart
 from email.message import EmailMessage
 from email.mime.text import MIMEText
+import markdown.extensions.fenced_code
 import configparser
 import datetime
 import markdown
@@ -113,7 +114,7 @@ def execute_commands():
             logging.debug("\t{0}\tNew value for command: {1} has been read.".format(logtime, command_value))
 
             f = open(logfile, "a")
-            f.write("### Output of `{0}`\n```\n".format(command_value))
+            f.write("### Output of `{0}`\n```sh\n".format(command_value))
             f.close()
 
             os.system(command_value + " >> " + logfile)
@@ -137,7 +138,7 @@ def convert_md_html():
             logging.debug("\t{0}\tFile has been read".format(logtime))
 
         logging.debug("\t{0}\tGoint to convert to HTML".format(logtime))
-        converted = markdown.markdown(lfmd, extensions=['fenced_code'])
+        converted = markdown.markdown(lfmd, extensions=['fenced_code', 'codehilite'])
 
         # Creating html-header for formating (like display font etc.)
         lfhtml = f'''
