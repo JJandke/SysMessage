@@ -4,19 +4,12 @@
 # This script should execute several commands at start. The output is written to the file script.log, which will then
 # be emailed. No variables should be adjusted in this script. For configuration, the file script.yml is used,
 # in which the individual parameters are defined.
-
-# Importing required libraries
 from email.mime.multipart import MIMEMultipart
 from email.message import EmailMessage
 from email.mime.text import MIMEText
-from markdown_code_blocks import CodeRenderer
-from markdown_code_blocks import highlight
-from markdown_code_blocks import main
-import markdown.extensions.fenced_code
-import markdown_code_blocks
 import configparser
+import markdown2
 import datetime
-import markdown
 import logging
 import smtplib
 import shutil
@@ -118,14 +111,14 @@ def execute_commands():
             logging.debug("\t{0}\tNew value for command: {1} has been read.".format(logtime, command_value))
 
             f = open(logfile, "a")
-            f.write("### Output of `{0}`\n```sh\n".format(command_value))
+            f.write("### Output of `{0}`\n```Bash\n".format(command_value))
             f.close()
 
             os.system(command_value + " >> " + logfile)
             logging.debug("\t{0}\tCommand: {1} has been executed.".format(logtime, new_command))
 
             f = open(logfile, "a")
-            f.write("```\n\n".format(command_value))
+            f.write("```\n\n\n\n".format(command_value))
             f.close()
 
     except Exception as e_badcommand:
@@ -142,29 +135,30 @@ def convert_md_html():
             logging.debug("\t{0}\tFile has been read".format(logtime))
 
         logging.debug("\t{0}\tGoint to convert to HTML".format(logtime))
-        converted = markdown.markdown(lfmd, extensions=['fenced_code', 'codehilite'])
+
+        converted = markdown2.markdown(lfmd, extras=['fenced-code-blocks', 'code-friendly'])
 
         # Creating html-header for formatting (like display font etc.)
         lfhtml = f'''
         <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                body {{font-family: TeleNeo Office, sans-serif; color:#000000;}}
-                body {{ background-color: #ffffff;}}
-            </style>
-        </head>
-        <body>
-            {converted}
-        </body>
-        </html>
+            <html>
+            <head>
+                <style>
+                    body {{font-family: TeleNeo Office, sans-serif; color: #000000;}}
+                    body {{background-color: #ffffff;}}
+                </style>
+            </head>
+            <body>
+                {converted}
+            </body>
+            </html>
         '''
 
         # End of html-header,
         # continuing with writing the converted logs to the new html file
         logging.debug("\t{0}\tConverted to HTML".format(logtime))
 
-        logging.debug("\t{0}\tGoint to write to new File".format(logtime))
+        logging.debug("\t{0}\tGoing to write to new File".format(logtime))
         with open(html_logfile, 'w') as lf:
             lf.write(lfhtml)
             logging.debug("\t{0}\tNew File daily-message.html has been created".format(logtime))
