@@ -118,7 +118,7 @@ def execute_commands():
             logging.debug("\t{0}\tCommand: {1} has been executed.".format(logtime, new_command))
 
             f = open(logfile, "a")
-            f.write("```\n\n\n\n".format(command_value))
+            f.write("```\n<br/><br/>\n".format(command_value))
             f.close()
 
     except Exception as e_badcommand:
