@@ -118,7 +118,7 @@ def execute_commands():
             logging.debug("\t{0}\tCommand: {1} has been executed.".format(logtime, new_command))
 
             f = open(logfile, "a")
-            f.write("```\n<br/><br/>\n".format(command_value))
+            f.write("```\n<br/><br/>\n\n---\n\n".format(command_value))
             f.close()
 
     except Exception as e_badcommand:
@@ -136,7 +136,7 @@ def convert_md_html():
 
         logging.debug("\t{0}\tGoint to convert to HTML".format(logtime))
 
-        converted = markdown2.markdown(lfmd, extras=['fenced-code-blocks', 'code-friendly'])
+        converted = markdown2.markdown(lfmd, extras=['fenced-code-blocks'])
 
         # Creating html-header for formatting (like display font etc.)
         lfhtml = f'''
@@ -146,8 +146,22 @@ def convert_md_html():
                 <style>
                     body {{font-family: TeleNeo Office, sans-serif; color: #000000;}}
                     body {{background-color: #ffffff;}}
-                    code {{font-family: Courier New, monospace; font-weight: normal; font-size: medium; color: #ffffff; background-color: #373f4d; border-radius: 5px;}}
-                </style>
+                    code {{
+                        font-family: Google Sans, monospace;
+                        font-weight: normal;
+                        font-size: medium;
+                        color: black;
+                        background-color: #E3E6E8;
+                        border-radius: 3px;
+                    }}
+                    .codehilite {{
+                        display: inline-block;
+                        background-color: #E3E6E8;
+                        padding: 0px 55px 0px 10px;
+                        border-radius: 7px;
+                    }}
+        
+    </style>
             </head>
             <body>
                 {converted}
